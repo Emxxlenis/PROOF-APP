@@ -1,0 +1,412 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Proof Platform API",
+    "version": "1.0.0",
+    "description": "API documentation for Proof Platform - Where Execution Speaks",
+    "contact": {
+      "name": "API Support",
+      "email": "support@proof.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://api.proof.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sb-access-token"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "stage": { "type": "string", "enum": ["ideation", "validation", "mvp", "first_sale", "growth"] },
+          "visibility": { "type": "string", "enum": ["private", "public"] },
+          "logo_url": { "type": "string", "format": "uri" },
+          "cover_image_url": { "type": "string", "format": "uri" },
+          "student_id": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Hypothesis": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "startup_id": { "type": "string" },
+          "student_id": { "type": "string" },
+          "si_clause": { "type": "string" },
+          "entonces_clause": { "type": "string" },
+          "porque_clause": { "type": "string" },
+          "validation_method": { "type": "string" },
+          "target_metric": { "type": "string" },
+          "success_criteria": { "type": "string" },
+          "status": { "type": "string", "enum": ["draft", "validated", "invalidated"] },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "TeamInvitation": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "startup_id": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "enum": ["founder", "co_founder", "team_member"] },
+          "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+          "token": { "type": "string" },
+          "expires_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "TalentScore": {
+        "type": "object",
+        "properties": {
+          "totalScore": { "type": "number" },
+          "executionScore": { "type": "number" },
+          "engagementScore": { "type": "number" },
+          "tractionScore": { "type": "number" },
+          "collaborationScore": { "type": "number" },
+          "innovationScore": { "type": "number" },
+          "category": { "type": "string", "enum": ["high_performer", "on_track", "at_risk"] },
+          "trend": { "type": "string", "enum": ["up", "down", "stable"] }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/projects/{id}/invite": {
+      "post": {
+        "summary": "Invite team member to project",
+        "tags": ["Projects"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "role": { "type": "string", "enum": ["founder", "co_founder", "team_member"] }
+                },
+                "required": ["email", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitation"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/projects/invitations/{token}/accept": {
+      "post": {
+        "summary": "Accept team invitation",
+        "tags": ["Projects"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "teamMember": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/hypothesis/generate": {
+      "post": {
+        "summary": "Generate hypotheses using AI",
+        "tags": ["Hypothesis"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "startupId": { "type": "string" },
+                  "problema": { "type": "string" },
+                  "usuario": { "type": "string" },
+                  "por_que_ahora": { "type": "string" },
+                  "riesgo": { "type": "string" }
+                },
+                "required": ["startupId", "problema", "usuario", "por_que_ahora", "riesgo"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hypotheses generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hypotheses": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Hypothesis" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/hypothesis/{id}": {
+      "get": {
+        "summary": "Get hypothesis by ID",
+        "tags": ["Hypothesis"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hypothesis retrieved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Hypothesis" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update hypothesis",
+        "tags": ["Hypothesis"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "si_clause": { "type": "string" },
+                  "entonces_clause": { "type": "string" },
+                  "porque_clause": { "type": "string" },
+                  "validation_method": { "type": "string" },
+                  "target_metric": { "type": "string" },
+                  "success_criteria": { "type": "string" },
+                  "status": { "type": "string", "enum": ["draft", "validated", "invalidated"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hypothesis updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Hypothesis" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/talent/score": {
+      "get": {
+        "summary": "Get talent score for student/startup",
+        "tags": ["Talent"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "studentId",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "startupId",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Talent score retrieved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TalentScore" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/profile/upload-avatar": {
+      "post": {
+        "summary": "Upload user avatar",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "avatar_url": { "type": "string", "format": "uri" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      }
+    }
+  }
+}
+
+
