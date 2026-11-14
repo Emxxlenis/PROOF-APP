@@ -1,7 +1,7 @@
-# Proof Platform
+# PROOF
 
-**Plataforma web para validación de ideas y gestión de proyectos de emprendimiento.**  
-**Web platform for startup idea validation and project management.**
+**Inteligencia de negocio para proyectos en etapa temprana.**  
+**Business intelligence for early-stage projects.**
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### Descripción
 
-Aplicación full-stack construida con Next.js que permite validar ideas de negocio, gestionar proyectos y obtener feedback asistido por IA. Este repositorio es una versión de portafolio: la estructura, patrones y calidad del código son representativos del proyecto; la lógica de negocio propietaria y la configuración sensible no están incluidas (véase [SECURITY-CHANGES.md](SECURITY-CHANGES.md)).
+Sistema que mide si un proyecto temprano tiene negocio: activación, retención, NPS, CAC/LTV, churn y OKRs, con una lectura asistida por IA para decidir si sigue. La interfaz está en Next.js; el producto es esa decisión. Este repositorio es una versión de portafolio: la estructura, los patrones y la calidad del código son representativos del proyecto; la lógica de negocio propietaria y la configuración sensible no están incluidas (véase [SECURITY-CHANGES.md](SECURITY-CHANGES.md)).
 
 ### Stack tecnológico
 
@@ -95,7 +95,7 @@ MIT. Ver [LICENSE](LICENSE).
 
 ### Description
 
-Full-stack application built with Next.js for validating business ideas, managing projects, and getting AI-assisted feedback. This repository is a portfolio version: code structure, patterns, and quality are representative of the project; proprietary business logic and sensitive configuration are not included (see [SECURITY-CHANGES.md](SECURITY-CHANGES.md)).
+A system that measures whether an early-stage project has a business: activation, retention, NPS, CAC/LTV, churn, and OKRs, with an AI reading to support the go-forward decision. The interface is Next.js; the product is that decision. This repository is a portfolio version: code structure, patterns, and quality are representative of the project; proprietary business logic and sensitive configuration are not included (see [SECURITY-CHANGES.md](SECURITY-CHANGES.md)).
 
 ### Tech stack
 
